@@ -4,9 +4,16 @@ import pandas as pd
 import openai
 import json
 import os
+from dotenv import load_dotenv
 
-# Set your OpenAI API key
-openai.api_key = "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"  # Replace with your OpenAI API key
+# Load .env file
+load_dotenv()
+
+# Fetch API key
+openai.api_key = os.getenv("OPENAI_API_KEY")
+
+
+
 
 # Function to extract text from PDF
 def extract_text_from_pdf(pdf_file):
