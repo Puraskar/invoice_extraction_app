@@ -7,21 +7,17 @@ import os
 import json
 from dotenv import load_dotenv
 
-# Load environment variables
 load_dotenv()
 openai.api_key = os.getenv("OPENAI_API_KEY")
 
-# Configure Tesseract
 pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
 
 st.title("Fine-Tuned Invoice Extraction System")
 st.write("Upload an invoice image and extract structured data dynamically, including accurate line-item details.")
 
-# Function to extract text from image using Tesseract
 def extract_text_from_image(image):
     return pytesseract.image_to_string(image, lang="eng")
 
-# Function to parse invoice data dynamically with fine-tuning
 def parse_invoice_data(invoice_text):
     """
     Use GPT-3.5 Turbo to extract invoice data dynamically and provide fine-tuned, accurate line-item details.
@@ -86,21 +82,18 @@ def parse_invoice_data(invoice_text):
         st.error(f"Error parsing invoice data: {e}")
         return None
 
-# Function to save fully dynamic data to Excel with fine-tuned line items
 def save_to_dynamic_excel(data, output_file):
     """
     Save extracted invoice data to an Excel file dynamically, including fine-tuned and accurate line-item details.
     """
     try:
         with pd.ExcelWriter(output_file, engine='xlsxwriter') as writer:
-            # Save Invoice Metadata
             if "Invoice Metadata" in data:
                 metadata = pd.DataFrame.from_dict(data["Invoice Metadata"], orient="index", columns=["Value"])
                 metadata.reset_index(inplace=True)
                 metadata.columns = ["Field", "Value"]
                 metadata.to_excel(writer, sheet_name="Invoice_Metadata", index=False)
 
-            # Save Vendor and Client Details
             details = []
             if "Vendor Details" in data:
                 for key, value in data["Vendor Details"].items():
@@ -112,12 +105,10 @@ def save_to_dynamic_excel(data, output_file):
                 details_df = pd.DataFrame(details)
                 details_df.to_excel(writer, sheet_name="Vendor_Client_Details", index=False)
 
-            # Save Line Items
             if "Line Items" in data:
                 line_items_df = pd.DataFrame(data["Line Items"])
                 line_items_df.to_excel(writer, sheet_name="Line_Items", index=False)
 
-            # Save Summary
             if "Summary" in data:
                 summary_df = pd.DataFrame.from_dict(data["Summary"], orient="index", columns=["Value"])
                 summary_df.reset_index(inplace=True)
@@ -128,20 +119,16 @@ def save_to_dynamic_excel(data, output_file):
     except Exception as e:
         return False, str(e)
 
-# Upload image
 uploaded_file = st.file_uploader("Upload Invoice Image", type=["png", "jpg", "jpeg"])
 if uploaded_file:
     try:
-        # Display uploaded image
         st.image(uploaded_file, caption="Uploaded Invoice", use_column_width=True)
 
-        # Extract text from image
         st.info("Extracting text from image...")
         image = Image.open(uploaded_file)
         invoice_text = extract_text_from_image(image)
         st.text_area("Extracted Text", invoice_text, height=300)
 
-        # Parse invoice data dynamically
         st.info("Parsing invoice data dynamically...")
         parsed_data = parse_invoice_data(invoice_text)
 
@@ -149,7 +136,6 @@ if uploaded_file:
             st.json(parsed_data)
             st.success("Invoice data parsed successfully!")
 
-            # Save parsed data to Excel
             output_file = "fine_tuned_invoice_data.xlsx"
             success, message = save_to_dynamic_excel(parsed_data, output_file)
             if success:
