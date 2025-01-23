@@ -7,6 +7,4 @@ xlsxwriter==3.1.9
 openai==0.28
 numpy
 streamlit
-streamlit-cropper
-opencv-python-headless
 pytesseract
